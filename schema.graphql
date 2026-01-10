@@ -1,0 +1,107 @@
+type Deposit {
+  id: ID!
+  vaultAddress: String!
+  chainId: Int!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  blockHash: String!
+  transactionHash: String!
+  transactionFrom: String!
+  logIndex: Int!
+  sender: String!
+  owner: String!
+  assets: BigInt!
+  shares: BigInt!
+}
+
+type Withdraw {
+  id: ID!
+  vaultAddress: String!
+  chainId: Int!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  blockHash: String!
+  transactionHash: String!
+  transactionFrom: String!
+  logIndex: Int!
+  sender: String!
+  receiver: String!
+  owner: String!
+  assets: BigInt!
+  shares: BigInt!
+}
+
+type Transfer {
+  id: ID!
+  vaultAddress: String!
+  chainId: Int!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  blockHash: String!
+  transactionHash: String!
+  transactionFrom: String!
+  logIndex: Int!
+  sender: String!
+  receiver: String!
+  value: BigInt!
+}
+
+type StrategyReported {
+  id: ID!
+  vaultAddress: String!
+  chainId: Int!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  blockHash: String!
+  transactionHash: String!
+  transactionFrom: String!
+  logIndex: Int!
+  strategy: String!
+  gain: BigInt!
+  loss: BigInt!
+  current_debt: BigInt!
+  protocol_fees: BigInt!
+  total_fees: BigInt!
+  total_refunds: BigInt!
+}
+
+type DebtUpdated {
+  id: ID!
+  vaultAddress: String!
+  chainId: Int!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  blockHash: String!
+  transactionHash: String!
+  transactionFrom: String!
+  logIndex: Int!
+  strategy: String!
+  current_debt: BigInt!
+  new_debt: BigInt!
+}
+
+type StrategyChanged {
+  id: ID!
+  vaultAddress: String!
+  chainId: Int!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  blockHash: String!
+  transactionHash: String!
+  transactionFrom: String!
+  logIndex: Int!
+  strategy: String!
+  change_type: BigInt!
+}
+
+type Shutdown {
+  id: ID!
+  vaultAddress: String!
+  chainId: Int!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  blockHash: String!
+  transactionHash: String!
+  transactionFrom: String!
+  logIndex: Int!
+}
