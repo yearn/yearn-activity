@@ -10,7 +10,7 @@ export default async function ActivityPage() {
   let hasError = false;
 
   try {
-    activityData = await getRecentActivity(500, [...SUPPORTED_CHAIN_IDS]);
+    activityData = await getRecentActivity(50, [...SUPPORTED_CHAIN_IDS]);
   } catch (error) {
     console.error('Failed to fetch activity:', error);
     hasError = true;
@@ -63,7 +63,7 @@ export default async function ActivityPage() {
           </div>
         </div>
       ) : (
-        <ActivityFeedServer events={sortedEvents} />
+        <ActivityFeedServer events={sortedEvents} backgroundFetchEnabled backgroundFetchLimit={3000} />
       )}
       </div>
     </div>

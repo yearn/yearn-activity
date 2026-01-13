@@ -13,7 +13,7 @@ import {
   getChainLogoUrl,
   getTokenLogoUrl,
 } from '@/lib/envio/constants';
-import { formatNumberWithCommas, parseEventId } from '@/lib/envio/utils';
+import { formatNumberWithCommas, parseEventId, sortEventsChronologically } from '@/lib/envio/utils';
 
 type EventType = 'deposit' | 'withdraw' | 'transfer' | 'strategyReported' | 'debtUpdated' | 'strategyChanged' | 'shutdown';
 
@@ -47,11 +47,23 @@ interface ActivityFeedProps {
   events: Event[];
   limitPerCategory?: number;
   strategyNames?: Map<string, string>;
+  backgroundFetchLimit?: number;
+  backgroundFetchEnabled?: boolean;
 }
 
 type ViewMode = 'vault' | 'user';
 
-export default function ActivityFeed({ events, limitPerCategory, strategyNames }: ActivityFeedProps) {
+export default function ActivityFeed({
+  events,
+  limitPerCategory,
+  strategyNames,
+  backgroundFetchLimit = 500,
+  backgroundFetchEnabled = false,
+}: ActivityFeedProps) {
+  const [loadedEvents, setLoadedEvents] = useState<Event[]>(events);
+  const [loadedStrategyNames, setLoadedStrategyNames] = useState<Map<string, string>>(strategyNames ?? new Map());
+  const [hasBackgroundLoaded, setHasBackgroundLoaded] = useState(false);
+  const [isBackgroundLoading, setIsBackgroundLoading] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('user');
   const [selectedVault, setSelectedVault] = useState<string>('all');
   const [showRedundantEvents, setShowRedundantEvents] = useState(false);
@@ -66,6 +78,66 @@ export default function ActivityFeed({ events, limitPerCategory, strategyNames }
   const vaultMenuRef = useRef<HTMLDivElement | null>(null);
   const eventTypeMenuRef = useRef<HTMLDivElement | null>(null);
   const PAGE_SIZE = 50;
+
+  useEffect(() => {
+    setLoadedEvents(events);
+    setHasBackgroundLoaded(false);
+  }, [events]);
+
+  useEffect(() => {
+    setLoadedStrategyNames(strategyNames ?? new Map());
+  }, [strategyNames]);
+
+  useEffect(() => {
+    if (!backgroundFetchEnabled || hasBackgroundLoaded || isBackgroundLoading) return;
+    if (!backgroundFetchLimit || backgroundFetchLimit <= events.length) return;
+
+    const controller = new AbortController();
+    const loadBackground = async () => {
+      setIsBackgroundLoading(true);
+      try {
+        const response = await fetch(`/api/activity?limit=${backgroundFetchLimit}`, {
+          signal: controller.signal,
+        });
+        if (!response.ok) return;
+        const data = (await response.json()) as {
+          events?: Event[];
+          strategyNames?: Record<string, string>;
+        };
+        if (!data?.events?.length) return;
+
+        setLoadedEvents((prev) => {
+          const merged = new Map(prev.map((event) => [event.id, event]));
+          data.events!.forEach((event) => merged.set(event.id, event));
+          return sortEventsChronologically(Array.from(merged.values())).reverse();
+        });
+
+        if (data.strategyNames) {
+          setLoadedStrategyNames((prev) => {
+            const merged = new Map(prev);
+            Object.entries(data.strategyNames!).forEach(([key, value]) => {
+              if (value) merged.set(key, value);
+            });
+            return merged;
+          });
+        }
+
+        setHasBackgroundLoaded(true);
+      } catch (error) {
+        if ((error as { name?: string })?.name !== 'AbortError') {
+          console.error('Failed to background load activity:', error);
+        }
+      } finally {
+        setIsBackgroundLoading(false);
+      }
+    };
+
+    loadBackground();
+
+    return () => {
+      controller.abort();
+    };
+  }, [backgroundFetchEnabled, backgroundFetchLimit, events.length, hasBackgroundLoaded, isBackgroundLoading]);
 
   const vaultOptions = useMemo(
     () =>
@@ -157,9 +229,9 @@ export default function ActivityFeed({ events, limitPerCategory, strategyNames }
   const getEventChainId = (event: Event) => event.chainId ?? parseEventId(event.id).chainId;
 
   const filteredEvents = useMemo(() => {
-    if (selectedVault === 'all') return events;
-    return events.filter((event) => event.vaultAddress.toLowerCase() === selectedVault);
-  }, [events, selectedVault]);
+    if (selectedVault === 'all') return loadedEvents;
+    return loadedEvents.filter((event) => event.vaultAddress.toLowerCase() === selectedVault);
+  }, [loadedEvents, selectedVault]);
 
   const chainFilteredEvents = useMemo(() => {
     if (selectedChain === 'all') return filteredEvents;
@@ -246,7 +318,7 @@ export default function ActivityFeed({ events, limitPerCategory, strategyNames }
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [viewMode, selectedVault, selectedChain, selectedEventType, showRedundantEvents, limitPerCategory, events]);
+  }, [viewMode, selectedVault, selectedChain, selectedEventType, showRedundantEvents, limitPerCategory, loadedEvents]);
 
   useEffect(() => {
     setSelectedEventType('all');
@@ -684,7 +756,7 @@ export default function ActivityFeed({ events, limitPerCategory, strategyNames }
               const strategyKey = event.strategy && event.chainId
                 ? `${event.chainId}:${event.strategy.toLowerCase()}`
                 : null;
-              const strategyName = strategyKey ? strategyNames?.get(strategyKey) : undefined;
+              const strategyName = strategyKey ? loadedStrategyNames.get(strategyKey) : undefined;
               return <ActivityRow key={event.id} event={event} strategyName={strategyName} />;
             })}
           </div>

@@ -32,18 +32,33 @@ interface Event {
 interface ActivityFeedServerProps {
   events: Event[];
   limitPerCategory?: number;
+  backgroundFetchLimit?: number;
+  backgroundFetchEnabled?: boolean;
 }
 
 /**
  * Server component wrapper that pre-fetches strategy names using multicall
  * and passes them to the client ActivityFeed component
  */
-export default async function ActivityFeedServer({ events, limitPerCategory }: ActivityFeedServerProps) {
+export default async function ActivityFeedServer({
+  events,
+  limitPerCategory,
+  backgroundFetchLimit,
+  backgroundFetchEnabled,
+}: ActivityFeedServerProps) {
   // Extract unique strategy requests from events
   const strategyRequests = extractStrategyRequests(events);
 
   // Batch fetch all strategy names in parallel
   const strategyNames = await batchFetchStrategyNames(strategyRequests);
 
-  return <ActivityFeed events={events} limitPerCategory={limitPerCategory} strategyNames={strategyNames} />;
+  return (
+    <ActivityFeed
+      events={events}
+      limitPerCategory={limitPerCategory}
+      strategyNames={strategyNames}
+      backgroundFetchLimit={backgroundFetchLimit}
+      backgroundFetchEnabled={backgroundFetchEnabled}
+    />
+  );
 }
