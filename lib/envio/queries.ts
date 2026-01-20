@@ -1,6 +1,7 @@
 import { gql } from 'graphql-request';
 import { envioClient } from './client';
 import { SUPPORTED_CHAIN_IDS } from './constants';
+import { unstable_cache } from 'next/cache';
 
 export interface DepositEvent {
   id: string;
@@ -251,11 +252,22 @@ async function _getRecentActivity(limit: number = 50, chainIds: ChainId[] = [1])
   return mergeActivityResponses(responses);
 }
 
+// Cached version with 30 second revalidation
+const getRecentActivityCached = unstable_cache(_getRecentActivity, ['recent-activity'], {
+  revalidate: 30,
+  tags: ['activity'],
+});
+
 export async function getRecentActivity(
   limit: number = 50,
   chainIds: ChainId[] = [1]
 ): Promise<ActivityResponse> {
-  return _getRecentActivity(limit, chainIds);
+  // Large payloads can exceed Next.js data cache limits; skip caching in that case.
+  if (limit > 200 || chainIds.length > 1) {
+    return _getRecentActivity(limit, chainIds);
+  }
+
+  return getRecentActivityCached(limit, chainIds);
 }
 
 // Get user positions and history

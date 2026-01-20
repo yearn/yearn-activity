@@ -3,8 +3,7 @@ import { sortEventsChronologically } from '@/lib/envio/utils';
 import ActivityFeedServer from '@/components/activity/ActivityFeedServer';
 import { SUPPORTED_CHAIN_IDS } from '@/lib/envio/constants';
 
-export const revalidate = 0;
-export const dynamic = 'force-dynamic';
+export const revalidate = 30; // Revalidate every 30 seconds
 
 export default async function ActivityPage() {
   let activityData;

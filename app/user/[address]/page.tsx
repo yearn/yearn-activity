@@ -4,8 +4,7 @@ import ActivityRow from '@/components/activity/ActivityRow';
 import { notFound } from 'next/navigation';
 import { SUPPORTED_CHAIN_IDS } from '@/lib/envio/constants';
 
-export const revalidate = 0;
-export const dynamic = 'force-dynamic';
+export const revalidate = 60; // Revalidate every 60 seconds
 
 interface PageProps {
   params: Promise<{

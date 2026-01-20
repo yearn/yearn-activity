@@ -47,12 +47,10 @@ export async function GET(request: NextRequest) {
     const strategyRequests = extractStrategyRequests(sortedEvents);
     const strategyNames = await batchFetchStrategyNames(strategyRequests);
 
-    const response = NextResponse.json({
+    return NextResponse.json({
       events: sortedEvents,
       strategyNames: Object.fromEntries(strategyNames.entries()),
     });
-    response.headers.set('Cache-Control', 'no-store');
-    return response;
   } catch (error) {
     console.error('Failed to fetch recent activity:', error);
     return NextResponse.json({ error: 'Failed to fetch activity' }, { status: 500 });
