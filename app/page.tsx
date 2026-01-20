@@ -13,7 +13,8 @@ import {
 } from '@/lib/envio/constants';
 import ActivityFeedServer from '@/components/activity/ActivityFeedServer';
 
-export const revalidate = 30; // Revalidate every 30 seconds
+export const revalidate = 0;
+export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
   let activityData;

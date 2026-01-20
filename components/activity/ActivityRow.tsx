@@ -73,7 +73,7 @@ export default function ActivityRow({ event, strategyName }: ActivityRowProps) {
           iconBg: 'bg-up-only-green-500/10',
           iconColor: 'text-up-only-green-500',
           label: 'Deposit',
-          amount: event.assets ? formatCurrency(formatUnits(event.assets, decimals), 2) : '0.00',
+          amount: event.assets ? `+${formatCurrency(formatUnits(event.assets, decimals), 2)}` : '+0.00',
           symbol: vaultSymbol,
         };
       case 'withdraw':
@@ -82,7 +82,7 @@ export default function ActivityRow({ event, strategyName }: ActivityRowProps) {
           iconBg: 'bg-disco-salmon-500/10',
           iconColor: 'text-disco-salmon-500',
           label: 'Withdraw',
-          amount: event.assets ? formatCurrency(formatUnits(event.assets, decimals), 2) : '0.00',
+          amount: event.assets ? `-${formatCurrency(formatUnits(event.assets, decimals), 2)}` : '-0.00',
           symbol: vaultSymbol,
         };
       case 'transfer':
@@ -167,6 +167,14 @@ export default function ActivityRow({ event, strategyName }: ActivityRowProps) {
           : 'text-disco-salmon-500'
         : 'text-white'
       : 'text-white';
+  const amountClass =
+    event.type === 'deposit'
+      ? 'text-up-only-green-500'
+      : event.type === 'withdraw'
+        ? 'text-disco-salmon-500'
+        : event.type === 'debtUpdated'
+          ? debtAmountClass
+          : 'text-white';
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] items-start md:items-center py-4 px-4 hover:bg-good-ol-grey-800/50 transition-colors gap-3 md:gap-0">
@@ -221,7 +229,7 @@ export default function ActivityRow({ event, strategyName }: ActivityRowProps) {
       </div>
 
       <div className="text-right w-full md:w-44 flex-shrink-0">
-        <div className={`text-[1.15rem] font-semibold font-numeric ${debtAmountClass}`}>
+        <div className={`text-[1.15rem] font-semibold font-numeric ${amountClass}`}>
           {display.amount} {display.symbol}
         </div>
       </div>
