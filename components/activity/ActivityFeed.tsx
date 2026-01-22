@@ -246,6 +246,35 @@ export default function ActivityFeed({
     [chainFilteredEvents]
   );
 
+  const dedupedUserEvents = useMemo(() => {
+    const seen = new Map<string, { index: number; priority: number }>();
+    const deduped: Event[] = [];
+
+    for (const event of userEvents) {
+      const transactionHash = event.transactionHash?.toLowerCase();
+      if (!transactionHash) {
+        deduped.push(event);
+        continue;
+      }
+
+      const priority = event.type === 'transfer' ? 0 : 1;
+      const existing = seen.get(transactionHash);
+
+      if (!existing) {
+        seen.set(transactionHash, { index: deduped.length, priority });
+        deduped.push(event);
+        continue;
+      }
+
+      if (priority > existing.priority) {
+        deduped[existing.index] = event;
+        seen.set(transactionHash, { index: existing.index, priority });
+      }
+    }
+
+    return deduped;
+  }, [userEvents]);
+
   const trackedVaultSet = useMemo(
     () => new Set(Object.values(TRACKED_VAULTS).map((address) => address.toLowerCase())),
     []
@@ -254,7 +283,7 @@ export default function ActivityFeed({
   const withdrawTxHashes = useMemo(
     () =>
       new Set(
-        userEvents
+        dedupedUserEvents
           .filter(
             (event) =>
               event.type === 'withdraw' &&
@@ -263,7 +292,7 @@ export default function ActivityFeed({
           )
           .map((event) => event.transactionHash!.toLowerCase())
       ),
-    [trackedVaultSet, userEvents]
+    [trackedVaultSet, dedupedUserEvents]
   );
 
   const vaultEvents = useMemo(
@@ -292,9 +321,9 @@ export default function ActivityFeed({
   );
 
   const filteredUserEvents = useMemo(() => {
-    if (selectedEventType === 'all') return userEvents;
-    return userEvents.filter((event) => event.type === selectedEventType);
-  }, [selectedEventType, userEvents]);
+    if (selectedEventType === 'all') return dedupedUserEvents;
+    return dedupedUserEvents.filter((event) => event.type === selectedEventType);
+  }, [selectedEventType, dedupedUserEvents]);
 
   const filteredVaultEvents = useMemo(() => {
     if (selectedEventType === 'all') return vaultEvents;
