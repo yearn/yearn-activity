@@ -136,7 +136,6 @@ function getExplorerBaseUrl(chainId: number = 1): string {
   const baseUrls: Record<number, string> = {
     1: 'https://etherscan.io',
     42161: 'https://arbiscan.io',
-    10: 'https://optimistic.etherscan.io',
     137: 'https://polygonscan.com',
     8453: 'https://basescan.org',
     747474: 'https://katanascan.com/',

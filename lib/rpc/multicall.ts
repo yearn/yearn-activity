@@ -1,5 +1,5 @@
 import { createPublicClient, http, type Address } from 'viem';
-import { arbitrum, base, mainnet, optimism, polygon } from 'viem/chains';
+import { arbitrum, base, mainnet, polygon } from 'viem/chains';
 import { parseEventId } from '@/lib/envio/utils';
 
 const STRATEGY_NAME_ABI = [
@@ -14,7 +14,6 @@ const STRATEGY_NAME_ABI = [
 
 const chainById = {
   1: mainnet,
-  10: optimism,
   137: polygon,
   8453: base,
   42161: arbitrum,

@@ -9,7 +9,7 @@ export default function VaultsPage() {
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-white mb-4">Yearn V3 Vaults</h1>
         <p className="text-lg text-good-ol-grey-400">
-          All tracked Yearn V3 vaults on Ethereum Mainnet and Base.
+          All tracked Yearn V3 vaults across Ethereum, Base, Arbitrum, and Polygon.
         </p>
       </div>
 

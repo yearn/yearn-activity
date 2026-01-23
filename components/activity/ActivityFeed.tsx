@@ -158,10 +158,11 @@ export default function ActivityFeed({
   );
 
   const chainOptions = useMemo(
-    () => [
-      { value: '1', label: getChainName(1) },
-      { value: '8453', label: getChainName(8453) },
-    ],
+    () =>
+      SUPPORTED_CHAIN_IDS.map((chainId) => ({
+        value: chainId.toString(),
+        label: getChainName(chainId),
+      })),
     []
   );
   const eventTypeOptions = useMemo(() => {
@@ -598,6 +599,10 @@ export default function ActivityFeed({
           </label>
         </div>
       </div>
+
+      {isBackgroundLoading ? (
+        <div className="mb-4 text-sm text-good-ol-grey-400">Loading more events...</div>
+      ) : null}
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
