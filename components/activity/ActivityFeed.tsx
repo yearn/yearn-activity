@@ -164,15 +164,7 @@ export default function ActivityFeed({
     return () => {
       controller.abort();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    backgroundFetchEnabled,
-    backgroundFetchLimit,
-    backgroundFetchMode,
-    hasBackgroundLoaded,
-    loadedEvents.length,
-    loadedVaultEventCount,
-  ]);
+  }, [backgroundFetchEnabled, backgroundFetchLimit, backgroundFetchMode, hasBackgroundLoaded]);
 
   const vaultOptions = useMemo(
     () =>
@@ -383,7 +375,7 @@ export default function ActivityFeed({
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [viewMode, selectedVault, selectedChain, selectedEventType, showRedundantEvents, limitPerCategory, loadedEvents]);
+  }, [viewMode, selectedVault, selectedChain, selectedEventType, showRedundantEvents, limitPerCategory]);
 
   useEffect(() => {
     setSelectedEventType('all');
