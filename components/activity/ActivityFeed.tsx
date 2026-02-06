@@ -115,12 +115,18 @@ export default function ActivityFeed({
         const response = await fetch(`/api/activity?limit=${backgroundFetchLimit}&mode=${backgroundFetchMode}`, {
           signal: controller.signal,
         });
-        if (!response.ok) return;
+        if (!response.ok) {
+          setHasBackgroundLoaded(true);
+          return;
+        }
         const data = (await response.json()) as {
           events?: Event[];
           strategyNames?: Record<string, string>;
         };
-        if (!data?.events?.length) return;
+        if (!data?.events?.length) {
+          setHasBackgroundLoaded(true);
+          return;
+        }
 
         setLoadedEvents((prev) => {
           const merged = new Map(prev.map((event) => [event.id, event]));
@@ -142,6 +148,7 @@ export default function ActivityFeed({
       } catch (error) {
         if ((error as { name?: string })?.name !== 'AbortError') {
           console.error('Failed to background load activity:', error);
+          setHasBackgroundLoaded(true);
         }
       } finally {
         setIsBackgroundLoading(false);
