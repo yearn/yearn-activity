@@ -34,6 +34,7 @@ interface ActivityFeedServerProps {
   limitPerCategory?: number;
   backgroundFetchLimit?: number;
   backgroundFetchEnabled?: boolean;
+  backgroundFetchMode?: 'all' | 'vault';
 }
 
 /**
@@ -45,6 +46,7 @@ export default async function ActivityFeedServer({
   limitPerCategory,
   backgroundFetchLimit,
   backgroundFetchEnabled,
+  backgroundFetchMode,
 }: ActivityFeedServerProps) {
   // Extract unique strategy requests from events
   const strategyRequests = extractStrategyRequests(events);
@@ -59,6 +61,7 @@ export default async function ActivityFeedServer({
       strategyNames={strategyNames}
       backgroundFetchLimit={backgroundFetchLimit}
       backgroundFetchEnabled={backgroundFetchEnabled}
+      backgroundFetchMode={backgroundFetchMode}
     />
   );
 }

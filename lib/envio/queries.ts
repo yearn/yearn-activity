@@ -102,6 +102,19 @@ export interface ActivityResponse {
   shutdowns: ShutdownEvent[];
 }
 
+export interface UserActivityResponse {
+  deposits: DepositEvent[];
+  withdrawals: WithdrawEvent[];
+  transfers: TransferEvent[];
+}
+
+export interface VaultManagementActivityResponse {
+  strategyReports: StrategyReportedEvent[];
+  debtUpdates: DebtUpdatedEvent[];
+  strategyChanges: StrategyChangedEvent[];
+  shutdowns: ShutdownEvent[];
+}
+
 // Get recent activity across all vaults
 function mergeActivityResponses(responses: ActivityResponse[]): ActivityResponse {
   return responses.reduce<ActivityResponse>(
@@ -268,6 +281,220 @@ export async function getRecentActivity(
   }
 
   return getRecentActivityCached(limit, chainIds);
+}
+
+// Get recent user transaction activity only (deposits/withdrawals/transfers)
+async function _getRecentUserTransactions(
+  limit: number = 50,
+  chainIds: ChainId[] = [1]
+): Promise<ActivityResponse> {
+  const query = gql`
+    query GetRecentUserTransactions($limit: Int!, $chainIds: [Int!]!) {
+      deposits: Deposit(
+        where: { chainId: { _in: $chainIds } }
+        order_by: { blockTimestamp: desc, blockNumber: desc, logIndex: desc }
+        limit: $limit
+      ) {
+        id
+        sender
+        owner
+        assets
+        shares
+        vaultAddress
+        chainId
+        blockNumber
+        blockTimestamp
+        transactionHash
+      }
+      withdrawals: Withdraw(
+        where: { chainId: { _in: $chainIds } }
+        order_by: { blockTimestamp: desc, blockNumber: desc, logIndex: desc }
+        limit: $limit
+      ) {
+        id
+        sender
+        receiver
+        owner
+        assets
+        shares
+        vaultAddress
+        chainId
+        blockNumber
+        blockTimestamp
+        transactionHash
+      }
+      transfers: Transfer(
+        where: { chainId: { _in: $chainIds } }
+        order_by: { blockTimestamp: desc, blockNumber: desc, logIndex: desc }
+        limit: $limit
+      ) {
+        id
+        sender
+        receiver
+        value
+        vaultAddress
+        chainId
+        blockNumber
+        blockTimestamp
+        transactionHash
+      }
+    }
+  `;
+
+  const buildResponse = (response: UserActivityResponse): ActivityResponse => ({
+    deposits: response.deposits,
+    withdrawals: response.withdrawals,
+    transfers: response.transfers,
+    strategyReports: [],
+    debtUpdates: [],
+    strategyChanges: [],
+    shutdowns: [],
+  });
+
+  if (chainIds.length <= 1) {
+    const response = await envioClient.request<UserActivityResponse>(query, { limit, chainIds });
+    return buildResponse(response);
+  }
+
+  const responses = await Promise.all(
+    chainIds.map((chainId) => envioClient.request<UserActivityResponse>(query, { limit, chainIds: [chainId] }))
+  );
+
+  const merged = responses.reduce<UserActivityResponse>(
+    (acc, response) => ({
+      deposits: acc.deposits.concat(response.deposits),
+      withdrawals: acc.withdrawals.concat(response.withdrawals),
+      transfers: acc.transfers.concat(response.transfers),
+    }),
+    {
+      deposits: [],
+      withdrawals: [],
+      transfers: [],
+    }
+  );
+
+  return buildResponse(merged);
+}
+
+export async function getRecentUserTransactions(
+  limit: number = 50,
+  chainIds: ChainId[] = [1]
+): Promise<ActivityResponse> {
+  return _getRecentUserTransactions(limit, chainIds);
+}
+
+// Get recent vault management activity only
+async function _getRecentVaultManagementActivity(
+  limit: number = 50,
+  chainIds: ChainId[] = [1]
+): Promise<ActivityResponse> {
+  const query = gql`
+    query GetRecentVaultManagementActivity($limit: Int!, $chainIds: [Int!]!) {
+      strategyReports: StrategyReported(
+        where: { chainId: { _in: $chainIds } }
+        order_by: { blockTimestamp: desc, blockNumber: desc, logIndex: desc }
+        limit: $limit
+      ) {
+        id
+        strategy
+        gain
+        loss
+        current_debt
+        protocol_fees
+        total_fees
+        total_refunds
+        vaultAddress
+        chainId
+        blockNumber
+        blockTimestamp
+        transactionHash
+      }
+      debtUpdates: DebtUpdated(
+        where: { chainId: { _in: $chainIds } }
+        order_by: { blockTimestamp: desc, blockNumber: desc, logIndex: desc }
+        limit: $limit
+      ) {
+        id
+        strategy
+        current_debt
+        new_debt
+        vaultAddress
+        chainId
+        blockNumber
+        blockTimestamp
+        transactionHash
+      }
+      strategyChanges: StrategyChanged(
+        where: { chainId: { _in: $chainIds } }
+        order_by: { blockTimestamp: desc, blockNumber: desc, logIndex: desc }
+        limit: $limit
+      ) {
+        id
+        strategy
+        change_type
+        vaultAddress
+        chainId
+        blockNumber
+        blockTimestamp
+        transactionHash
+      }
+      shutdowns: Shutdown(
+        where: { chainId: { _in: $chainIds } }
+        order_by: { blockTimestamp: desc, blockNumber: desc, logIndex: desc }
+        limit: $limit
+      ) {
+        id
+        vaultAddress
+        chainId
+        blockNumber
+        blockTimestamp
+        transactionHash
+      }
+    }
+  `;
+
+  const buildResponse = (response: VaultManagementActivityResponse): ActivityResponse => ({
+    deposits: [],
+    withdrawals: [],
+    transfers: [],
+    strategyReports: response.strategyReports,
+    debtUpdates: response.debtUpdates,
+    strategyChanges: response.strategyChanges,
+    shutdowns: response.shutdowns,
+  });
+
+  if (chainIds.length <= 1) {
+    const response = await envioClient.request<VaultManagementActivityResponse>(query, { limit, chainIds });
+    return buildResponse(response);
+  }
+
+  const responses = await Promise.all(
+    chainIds.map((chainId) => envioClient.request<VaultManagementActivityResponse>(query, { limit, chainIds: [chainId] }))
+  );
+
+  const merged = responses.reduce<VaultManagementActivityResponse>(
+    (acc, response) => ({
+      strategyReports: acc.strategyReports.concat(response.strategyReports),
+      debtUpdates: acc.debtUpdates.concat(response.debtUpdates),
+      strategyChanges: acc.strategyChanges.concat(response.strategyChanges),
+      shutdowns: acc.shutdowns.concat(response.shutdowns),
+    }),
+    {
+      strategyReports: [],
+      debtUpdates: [],
+      strategyChanges: [],
+      shutdowns: [],
+    }
+  );
+
+  return buildResponse(merged);
+}
+
+export async function getRecentVaultManagementActivity(
+  limit: number = 50,
+  chainIds: ChainId[] = [1]
+): Promise<ActivityResponse> {
+  return _getRecentVaultManagementActivity(limit, chainIds);
 }
 
 // Get user positions and history

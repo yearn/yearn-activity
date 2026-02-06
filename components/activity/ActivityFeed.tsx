@@ -49,9 +49,16 @@ interface ActivityFeedProps {
   strategyNames?: Map<string, string>;
   backgroundFetchLimit?: number;
   backgroundFetchEnabled?: boolean;
+  backgroundFetchMode?: 'all' | 'vault';
 }
 
 type ViewMode = 'vault' | 'user';
+
+const isVaultManagementEvent = (event: Event) =>
+  event.type === 'strategyReported' ||
+  event.type === 'debtUpdated' ||
+  event.type === 'strategyChanged' ||
+  event.type === 'shutdown';
 
 export default function ActivityFeed({
   events,
@@ -59,6 +66,7 @@ export default function ActivityFeed({
   strategyNames,
   backgroundFetchLimit = 500,
   backgroundFetchEnabled = false,
+  backgroundFetchMode = 'all',
 }: ActivityFeedProps) {
   const [loadedEvents, setLoadedEvents] = useState<Event[]>(events);
   const [loadedStrategyNames, setLoadedStrategyNames] = useState<Map<string, string>>(strategyNames ?? new Map());
@@ -88,15 +96,23 @@ export default function ActivityFeed({
     setLoadedStrategyNames(strategyNames ?? new Map());
   }, [strategyNames]);
 
+  const loadedVaultEventCount = useMemo(
+    () => loadedEvents.filter((event) => isVaultManagementEvent(event)).length,
+    [loadedEvents]
+  );
+
   useEffect(() => {
     if (!backgroundFetchEnabled || hasBackgroundLoaded || isBackgroundLoading) return;
-    if (!backgroundFetchLimit || backgroundFetchLimit <= events.length) return;
+    if (!backgroundFetchLimit) return;
+
+    const currentEventCountForMode = backgroundFetchMode === 'vault' ? loadedVaultEventCount : loadedEvents.length;
+    if (backgroundFetchLimit <= currentEventCountForMode) return;
 
     const controller = new AbortController();
     const loadBackground = async () => {
       setIsBackgroundLoading(true);
       try {
-        const response = await fetch(`/api/activity?limit=${backgroundFetchLimit}`, {
+        const response = await fetch(`/api/activity?limit=${backgroundFetchLimit}&mode=${backgroundFetchMode}`, {
           signal: controller.signal,
         });
         if (!response.ok) return;
@@ -137,7 +153,15 @@ export default function ActivityFeed({
     return () => {
       controller.abort();
     };
-  }, [backgroundFetchEnabled, backgroundFetchLimit, events.length, hasBackgroundLoaded, isBackgroundLoading]);
+  }, [
+    backgroundFetchEnabled,
+    backgroundFetchLimit,
+    backgroundFetchMode,
+    hasBackgroundLoaded,
+    isBackgroundLoading,
+    loadedEvents.length,
+    loadedVaultEventCount,
+  ]);
 
   const vaultOptions = useMemo(
     () =>

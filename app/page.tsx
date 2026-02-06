@@ -1,5 +1,5 @@
-import { getRecentActivity } from '@/lib/envio/queries';
-import { sortEventsChronologically, formatNumberWithCommas } from '@/lib/envio/utils';
+import { getRecentUserTransactions } from '@/lib/envio/queries';
+import { sortEventsChronologically } from '@/lib/envio/utils';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -20,7 +20,7 @@ export default async function HomePage() {
   let hasError = false;
 
   try {
-    activityData = await getRecentActivity(300, [...SUPPORTED_CHAIN_IDS]);
+    activityData = await getRecentUserTransactions(100, [...SUPPORTED_CHAIN_IDS]);
   } catch (error) {
     console.error('Failed to fetch activity:', error);
     hasError = true;
@@ -44,19 +44,6 @@ export default async function HomePage() {
     : [];
 
   const sortedEvents = sortEventsChronologically(allEvents).reverse();
-  const userEvents = sortedEvents.filter(
-    (event) => event.type === 'deposit' || event.type === 'withdraw' || event.type === 'transfer'
-  );
-  const vaultEvents = sortedEvents.filter(
-    (event) =>
-      event.type === 'strategyReported' ||
-      event.type === 'debtUpdated' ||
-      event.type === 'strategyChanged' ||
-      event.type === 'shutdown'
-  );
-  const userEventCount = Math.min(userEvents.length, 25);
-  const vaultEventCount = Math.min(vaultEvents.length, 25);
-  const recentEventCount = userEventCount + vaultEventCount;
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,#14233c_0%,#0b0f17_45%,#07090d_100%)] text-white">
@@ -92,7 +79,13 @@ export default async function HomePage() {
             </div>
           </div>
         ) : (
-          <ActivityFeedServer events={sortedEvents} limitPerCategory={25} />
+          <ActivityFeedServer
+            events={sortedEvents}
+            limitPerCategory={25}
+            backgroundFetchEnabled
+            backgroundFetchMode="vault"
+            backgroundFetchLimit={3000}
+          />
         )}
       </div>
 

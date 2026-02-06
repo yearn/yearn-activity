@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getRecentActivity } from '@/lib/envio/queries';
+import { getRecentActivity, getRecentVaultManagementActivity } from '@/lib/envio/queries';
 import { SUPPORTED_CHAIN_IDS } from '@/lib/envio/constants';
 import { sortEventsChronologically } from '@/lib/envio/utils';
 import { batchFetchStrategyNames, extractStrategyRequests } from '@/lib/rpc/multicall';
@@ -18,6 +18,10 @@ function parseChainIds(param: string | null): number[] {
   return filtered.length > 0 ? filtered : [...SUPPORTED_CHAIN_IDS];
 }
 
+function parseMode(param: string | null): 'all' | 'vault' {
+  return param === 'vault' ? 'vault' : 'all';
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const limitParam = Number(searchParams.get('limit'));
@@ -25,9 +29,13 @@ export async function GET(request: NextRequest) {
     ? Math.max(1, Math.min(limitParam, MAX_LIMIT))
     : DEFAULT_LIMIT;
   const chainIds = parseChainIds(searchParams.get('chainIds'));
+  const mode = parseMode(searchParams.get('mode'));
 
   try {
-    const activityData = await getRecentActivity(limit, chainIds as (typeof SUPPORTED_CHAIN_IDS)[number][]);
+    const activityData =
+      mode === 'vault'
+        ? await getRecentVaultManagementActivity(limit, chainIds as (typeof SUPPORTED_CHAIN_IDS)[number][])
+        : await getRecentActivity(limit, chainIds as (typeof SUPPORTED_CHAIN_IDS)[number][]);
     const allEvents = [
       ...activityData.deposits.map((d) => ({ ...d, type: 'deposit' as const })),
       ...activityData.withdrawals.map((w) => ({ ...w, type: 'withdraw' as const })),
