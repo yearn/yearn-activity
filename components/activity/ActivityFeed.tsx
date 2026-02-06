@@ -72,6 +72,7 @@ export default function ActivityFeed({
   const [loadedStrategyNames, setLoadedStrategyNames] = useState<Map<string, string>>(strategyNames ?? new Map());
   const [hasBackgroundLoaded, setHasBackgroundLoaded] = useState(false);
   const [isBackgroundLoading, setIsBackgroundLoading] = useState(false);
+  const isBackgroundLoadingRef = useRef(false);
   const [viewMode, setViewMode] = useState<ViewMode>('user');
   const [selectedVault, setSelectedVault] = useState<string>('all');
   const [showRedundantEvents, setShowRedundantEvents] = useState(false);
@@ -90,6 +91,7 @@ export default function ActivityFeed({
   useEffect(() => {
     setLoadedEvents(events);
     setHasBackgroundLoaded(false);
+    isBackgroundLoadingRef.current = false;
   }, [events]);
 
   useEffect(() => {
@@ -102,7 +104,7 @@ export default function ActivityFeed({
   );
 
   useEffect(() => {
-    if (!backgroundFetchEnabled || hasBackgroundLoaded || isBackgroundLoading) return;
+    if (!backgroundFetchEnabled || hasBackgroundLoaded || isBackgroundLoadingRef.current) return;
     if (!backgroundFetchLimit) return;
 
     const currentEventCountForMode = backgroundFetchMode === 'vault' ? loadedVaultEventCount : loadedEvents.length;
@@ -110,6 +112,7 @@ export default function ActivityFeed({
 
     const controller = new AbortController();
     const loadBackground = async () => {
+      isBackgroundLoadingRef.current = true;
       setIsBackgroundLoading(true);
       try {
         const response = await fetch(`/api/activity?limit=${backgroundFetchLimit}&mode=${backgroundFetchMode}`, {
@@ -151,6 +154,7 @@ export default function ActivityFeed({
           setHasBackgroundLoaded(true);
         }
       } finally {
+        isBackgroundLoadingRef.current = false;
         setIsBackgroundLoading(false);
       }
     };
@@ -160,12 +164,12 @@ export default function ActivityFeed({
     return () => {
       controller.abort();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     backgroundFetchEnabled,
     backgroundFetchLimit,
     backgroundFetchMode,
     hasBackgroundLoaded,
-    isBackgroundLoading,
     loadedEvents.length,
     loadedVaultEventCount,
   ]);
