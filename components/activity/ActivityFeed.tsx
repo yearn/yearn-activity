@@ -124,9 +124,12 @@ export default function ActivityFeed({
       isBackgroundLoadingRef.current = true;
       setIsBackgroundLoading(true);
       try {
-        const response = await fetch(`/api/activity?limit=${backgroundFetchLimit}&mode=${fetchMode}`, {
-          signal: controller.signal,
-        });
+        const response = await fetch(
+          `/api/activity?limit=${backgroundFetchLimit}&mode=${fetchMode}&includeStrategyNames=0`,
+          {
+            signal: controller.signal,
+          }
+        );
         if (!response.ok) {
           setBackgroundLoadedModes((prev) => ({ ...prev, [fetchMode]: true }));
           return;

@@ -22,6 +22,10 @@ function parseMode(param: string | null): 'all' | 'vault' {
   return param === 'vault' ? 'vault' : 'all';
 }
 
+function parseIncludeStrategyNames(param: string | null): boolean {
+  return param === '1' || param === 'true';
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const limitParam = Number(searchParams.get('limit'));
@@ -30,6 +34,7 @@ export async function GET(request: NextRequest) {
     : DEFAULT_LIMIT;
   const chainIds = parseChainIds(searchParams.get('chainIds'));
   const mode = parseMode(searchParams.get('mode'));
+  const includeStrategyNames = parseIncludeStrategyNames(searchParams.get('includeStrategyNames'));
 
   try {
     const activityData =
@@ -52,8 +57,15 @@ export async function GET(request: NextRequest) {
     ];
 
     const sortedEvents = sortEventsChronologically(allEvents).reverse();
-    const strategyRequests = extractStrategyRequests(sortedEvents);
-    const strategyNames = await batchFetchStrategyNames(strategyRequests);
+    let strategyNames = new Map<string, string>();
+    if (includeStrategyNames) {
+      try {
+        const strategyRequests = extractStrategyRequests(sortedEvents);
+        strategyNames = await batchFetchStrategyNames(strategyRequests);
+      } catch (error) {
+        console.warn('Failed to resolve strategy names for activity API response:', error);
+      }
+    }
 
     return NextResponse.json({
       events: sortedEvents,
