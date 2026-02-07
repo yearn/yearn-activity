@@ -50,6 +50,8 @@ interface ActivityFeedProps {
   backgroundFetchLimit?: number;
   backgroundFetchEnabled?: boolean;
   backgroundFetchMode?: 'all' | 'vault';
+  compactViewToggleOnMobile?: boolean;
+  compactVaultStatsOnMobile?: boolean;
 }
 
 type ViewMode = 'vault' | 'user';
@@ -67,6 +69,8 @@ export default function ActivityFeed({
   backgroundFetchLimit = 500,
   backgroundFetchEnabled = false,
   backgroundFetchMode = 'all',
+  compactViewToggleOnMobile = false,
+  compactVaultStatsOnMobile = false,
 }: ActivityFeedProps) {
   const [loadedEvents, setLoadedEvents] = useState<Event[]>(events);
   const [loadedStrategyNames, setLoadedStrategyNames] = useState<Map<string, string>>(strategyNames ?? new Map());
@@ -90,6 +94,8 @@ export default function ActivityFeed({
   const vaultMenuRef = useRef<HTMLDivElement | null>(null);
   const eventTypeMenuRef = useRef<HTMLDivElement | null>(null);
   const PAGE_SIZE = 50;
+  const viewToggleButtonSpacingClass = compactViewToggleOnMobile ? 'px-6 py-1.5 md:py-2' : 'px-6 py-2';
+  const vaultStatsCardClass = compactVaultStatsOnMobile ? 'card p-4 md:p-6' : 'card';
 
   useEffect(() => {
     setLoadedEvents(events);
@@ -438,7 +444,7 @@ export default function ActivityFeed({
         <div className="flex gap-2 p-1 bg-good-ol-grey-800 rounded-lg inline-flex">
           <button
             onClick={() => setViewMode('user')}
-            className={`px-6 py-2 rounded-md font-medium transition-all ${
+            className={`${viewToggleButtonSpacingClass} rounded-md font-medium transition-all ${
               viewMode === 'user'
                 ? 'bg-yearn-blue text-white shadow-sm'
                 : 'text-good-ol-grey-400 hover:text-white'
@@ -448,7 +454,7 @@ export default function ActivityFeed({
           </button>
           <button
             onClick={() => setViewMode('vault')}
-            className={`px-6 py-2 rounded-md font-medium transition-all ${
+            className={`${viewToggleButtonSpacingClass} rounded-md font-medium transition-all ${
               viewMode === 'vault'
                 ? 'bg-yearn-blue text-white shadow-sm'
                 : 'text-good-ol-grey-400 hover:text-white'
@@ -655,25 +661,25 @@ export default function ActivityFeed({
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         {viewMode === 'vault' ? (
           <>
-            <div className="card">
+            <div className={vaultStatsCardClass}>
               <div className="text-sm text-good-ol-grey-400 mb-2">Total Events</div>
               <div className="text-2xl font-bold text-white font-numeric">
                 {formatNumberWithCommas(limitedVaultEvents.length)}
               </div>
             </div>
-            <div className="card">
+            <div className={vaultStatsCardClass}>
               <div className="text-sm text-good-ol-grey-400 mb-2">Strategy Reports</div>
               <div className="text-2xl font-bold text-yearn-blue font-numeric">
                 {formatNumberWithCommas(limitedVaultEvents.filter((e) => e.type === 'strategyReported').length)}
               </div>
             </div>
-            <div className="card">
+            <div className={vaultStatsCardClass}>
               <div className="text-sm text-good-ol-grey-400 mb-2">Debt Updates</div>
               <div className="text-2xl font-bold text-purple-500 font-numeric">
                 {formatNumberWithCommas(limitedVaultEvents.filter((e) => e.type === 'debtUpdated').length)}
               </div>
             </div>
-            <div className="card">
+            <div className={vaultStatsCardClass}>
               <div className="text-sm text-good-ol-grey-400 mb-2">Strategy Changes</div>
               <div className="text-2xl font-bold text-orange-500 font-numeric">
                 {formatNumberWithCommas(limitedVaultEvents.filter((e) => e.type === 'strategyChanged').length)}

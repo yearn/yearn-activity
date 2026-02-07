@@ -43,6 +43,8 @@ interface ActivityRowProps {
   strategyName?: string | null;
 }
 
+const YEARN_OPS_SENDER = '0x283132390ea87d6ecc20255b59ba94329ee17961';
+
 export default function ActivityRow({ event, strategyName }: ActivityRowProps) {
   const parsed = parseEventId(event.id);
   const chainId = event.chainId ?? parsed.chainId;
@@ -63,6 +65,10 @@ export default function ActivityRow({ event, strategyName }: ActivityRowProps) {
   const shouldShowStrategyName =
     (event.type === 'debtUpdated' || event.type === 'strategyReported' || event.type === 'strategyChanged') &&
     !!event.strategy;
+  const isYearnOpsEvent =
+    (event.type === 'deposit' || event.type === 'withdraw') &&
+    !!event.sender &&
+    event.sender.toLowerCase() === YEARN_OPS_SENDER;
 
   // Get event-specific display data - memoized to avoid recalculation
   const display = useMemo(() => {
@@ -184,7 +190,14 @@ export default function ActivityRow({ event, strategyName }: ActivityRowProps) {
             <span className={`${display.iconColor} text-lg`}>{display.icon}</span>
           </div>
           <div>
-            <div className="text-[1.2rem] font-semibold text-white">{display.label}</div>
+            <div className="flex items-center gap-2">
+              <div className="text-[1.2rem] font-semibold text-white">{display.label}</div>
+              {isYearnOpsEvent ? (
+                <span className="inline-flex rounded-full border border-yearn-blue/30 bg-yearn-blue/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-yearn-blue">
+                  Yearn ops
+                </span>
+              ) : null}
+            </div>
             <div className="text-base text-good-ol-grey-300">{relativeTime}</div>
           </div>
         </div>

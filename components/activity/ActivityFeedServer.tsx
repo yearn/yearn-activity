@@ -35,6 +35,40 @@ interface ActivityFeedServerProps {
   backgroundFetchLimit?: number;
   backgroundFetchEnabled?: boolean;
   backgroundFetchMode?: 'all' | 'vault';
+  compactViewToggleOnMobile?: boolean;
+  compactVaultStatsOnMobile?: boolean;
+}
+
+const MAX_SERVER_SIDE_STRATEGY_REQUESTS = 24;
+const SERVER_SIDE_STRATEGY_LOOKUP_TIMEOUT_MS = 3000;
+
+async function prefetchStrategyNames(events: Event[]): Promise<Map<string, string>> {
+  const strategyRequests = extractStrategyRequests(events).slice(0, MAX_SERVER_SIDE_STRATEGY_REQUESTS);
+  if (!strategyRequests.length) {
+    return new Map();
+  }
+
+  let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+
+  try {
+    const timeoutPromise = new Promise<Map<string, string>>((resolve) => {
+      timeoutHandle = setTimeout(() => {
+        console.warn(
+          `Strategy name prefetch timed out after ${SERVER_SIDE_STRATEGY_LOOKUP_TIMEOUT_MS}ms. Continuing without names.`
+        );
+        resolve(new Map());
+      }, SERVER_SIDE_STRATEGY_LOOKUP_TIMEOUT_MS);
+    });
+
+    return await Promise.race([batchFetchStrategyNames(strategyRequests), timeoutPromise]);
+  } catch (error) {
+    console.warn('Failed to prefetch strategy names for activity feed:', error);
+    return new Map();
+  } finally {
+    if (timeoutHandle) {
+      clearTimeout(timeoutHandle);
+    }
+  }
 }
 
 /**
@@ -47,12 +81,10 @@ export default async function ActivityFeedServer({
   backgroundFetchLimit,
   backgroundFetchEnabled,
   backgroundFetchMode,
+  compactViewToggleOnMobile,
+  compactVaultStatsOnMobile,
 }: ActivityFeedServerProps) {
-  // Extract unique strategy requests from events
-  const strategyRequests = extractStrategyRequests(events);
-
-  // Batch fetch all strategy names in parallel
-  const strategyNames = await batchFetchStrategyNames(strategyRequests);
+  const strategyNames = await prefetchStrategyNames(events);
 
   return (
     <ActivityFeed
@@ -62,6 +94,8 @@ export default async function ActivityFeedServer({
       backgroundFetchLimit={backgroundFetchLimit}
       backgroundFetchEnabled={backgroundFetchEnabled}
       backgroundFetchMode={backgroundFetchMode}
+      compactViewToggleOnMobile={compactViewToggleOnMobile}
+      compactVaultStatsOnMobile={compactVaultStatsOnMobile}
     />
   );
 }

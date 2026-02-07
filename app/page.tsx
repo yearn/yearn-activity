@@ -47,9 +47,9 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,#14233c_0%,#0b0f17_45%,#07090d_100%)] text-white">
-      <div className="container-custom py-12">
+      <div className="container-custom pt-6 pb-12 md:py-12">
         {/* Hero Section */}
-        <div className="mb-12">
+        <div className="mb-8 md:mb-12">
           <h1 className="text-4xl md:text-5xl font-semibold text-white mb-4">
             Yearn Finance <span className="text-yearn-blue">Live Stats</span>
           </h1>
@@ -60,7 +60,7 @@ export default async function HomePage() {
 
       {/* Recent Activity Section */}
       <div className="mb-12">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4 md:mb-6">
           <h2 className="text-2xl font-semibold text-white">Recent Activity</h2>
           <Link href="/activity" className="btn-primary text-[17px]">
             View All Events →
@@ -85,6 +85,8 @@ export default async function HomePage() {
             backgroundFetchEnabled
             backgroundFetchMode="vault"
             backgroundFetchLimit={3000}
+            compactViewToggleOnMobile
+            compactVaultStatsOnMobile
           />
         )}
       </div>
