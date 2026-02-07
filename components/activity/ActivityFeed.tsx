@@ -70,7 +70,10 @@ export default function ActivityFeed({
 }: ActivityFeedProps) {
   const [loadedEvents, setLoadedEvents] = useState<Event[]>(events);
   const [loadedStrategyNames, setLoadedStrategyNames] = useState<Map<string, string>>(strategyNames ?? new Map());
-  const [hasBackgroundLoaded, setHasBackgroundLoaded] = useState(false);
+  const [backgroundLoadedModes, setBackgroundLoadedModes] = useState<Record<'all' | 'vault', boolean>>({
+    all: false,
+    vault: false,
+  });
   const [isBackgroundLoading, setIsBackgroundLoading] = useState(false);
   const isBackgroundLoadingRef = useRef(false);
   const [viewMode, setViewMode] = useState<ViewMode>('user');
@@ -90,7 +93,7 @@ export default function ActivityFeed({
 
   useEffect(() => {
     setLoadedEvents(events);
-    setHasBackgroundLoaded(false);
+    setBackgroundLoadedModes({ all: false, vault: false });
     isBackgroundLoadingRef.current = false;
   }, [events]);
 
@@ -104,10 +107,16 @@ export default function ActivityFeed({
   );
 
   useEffect(() => {
-    if (!backgroundFetchEnabled || hasBackgroundLoaded || isBackgroundLoadingRef.current) return;
+    if (!backgroundFetchEnabled || isBackgroundLoadingRef.current) return;
     if (!backgroundFetchLimit) return;
 
-    const currentEventCountForMode = backgroundFetchMode === 'vault' ? loadedVaultEventCount : loadedEvents.length;
+    // If user switches to Vault Management and we have no vault events loaded, force a vault-only backfill.
+    const fetchMode: 'all' | 'vault' =
+      viewMode === 'vault' && loadedVaultEventCount === 0 ? 'vault' : backgroundFetchMode;
+
+    if (backgroundLoadedModes[fetchMode]) return;
+
+    const currentEventCountForMode = fetchMode === 'vault' ? loadedVaultEventCount : loadedEvents.length;
     if (backgroundFetchLimit <= currentEventCountForMode) return;
 
     const controller = new AbortController();
@@ -115,11 +124,11 @@ export default function ActivityFeed({
       isBackgroundLoadingRef.current = true;
       setIsBackgroundLoading(true);
       try {
-        const response = await fetch(`/api/activity?limit=${backgroundFetchLimit}&mode=${backgroundFetchMode}`, {
+        const response = await fetch(`/api/activity?limit=${backgroundFetchLimit}&mode=${fetchMode}`, {
           signal: controller.signal,
         });
         if (!response.ok) {
-          setHasBackgroundLoaded(true);
+          setBackgroundLoadedModes((prev) => ({ ...prev, [fetchMode]: true }));
           return;
         }
         const data = (await response.json()) as {
@@ -127,7 +136,7 @@ export default function ActivityFeed({
           strategyNames?: Record<string, string>;
         };
         if (!data?.events?.length) {
-          setHasBackgroundLoaded(true);
+          setBackgroundLoadedModes((prev) => ({ ...prev, [fetchMode]: true }));
           return;
         }
 
@@ -147,11 +156,11 @@ export default function ActivityFeed({
           });
         }
 
-        setHasBackgroundLoaded(true);
+        setBackgroundLoadedModes((prev) => ({ ...prev, [fetchMode]: true }));
       } catch (error) {
         if ((error as { name?: string })?.name !== 'AbortError') {
           console.error('Failed to background load activity:', error);
-          setHasBackgroundLoaded(true);
+          setBackgroundLoadedModes((prev) => ({ ...prev, [fetchMode]: true }));
         }
       } finally {
         isBackgroundLoadingRef.current = false;
@@ -164,7 +173,15 @@ export default function ActivityFeed({
     return () => {
       controller.abort();
     };
-  }, [backgroundFetchEnabled, backgroundFetchLimit, backgroundFetchMode, hasBackgroundLoaded]);
+  }, [
+    backgroundFetchEnabled,
+    backgroundFetchLimit,
+    backgroundFetchMode,
+    backgroundLoadedModes,
+    loadedEvents.length,
+    loadedVaultEventCount,
+    viewMode,
+  ]);
 
   const vaultOptions = useMemo(
     () =>
