@@ -1,7 +1,7 @@
 import ActivityFeed from './ActivityFeed';
 import { batchFetchStrategyNames, extractStrategyRequests } from '@/lib/rpc/multicall';
 
-type EventType = 'deposit' | 'withdraw' | 'transfer' | 'strategyReported' | 'debtUpdated' | 'strategyChanged' | 'shutdown';
+type EventType = 'deposit' | 'withdraw' | 'transfer' | 'strategyReported' | 'debtUpdated' | 'strategyChanged' | 'shutdown' | 'roleSet';
 
 interface Event {
   id: string;
@@ -27,6 +27,8 @@ interface Event {
   total_fees?: string;
   total_refunds?: string;
   change_type?: string;
+  account?: string;
+  role?: string;
 }
 
 interface ActivityFeedServerProps {

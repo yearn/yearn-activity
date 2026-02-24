@@ -90,6 +90,17 @@ export interface ShutdownEvent {
   transactionHash: string;
 }
 
+export interface RoleSetEvent {
+  id: string;
+  vaultAddress: string;
+  chainId: number;
+  blockNumber: string;
+  blockTimestamp: string;
+  transactionHash: string;
+  account: string;
+  role: string;
+}
+
 export type ChainId = (typeof SUPPORTED_CHAIN_IDS)[number];
 
 export interface ActivityResponse {
@@ -100,6 +111,7 @@ export interface ActivityResponse {
   debtUpdates: DebtUpdatedEvent[];
   strategyChanges: StrategyChangedEvent[];
   shutdowns: ShutdownEvent[];
+  roleSets: RoleSetEvent[];
 }
 
 export interface UserActivityResponse {
@@ -113,6 +125,7 @@ export interface VaultManagementActivityResponse {
   debtUpdates: DebtUpdatedEvent[];
   strategyChanges: StrategyChangedEvent[];
   shutdowns: ShutdownEvent[];
+  roleSets: RoleSetEvent[];
 }
 
 // Get recent activity across all vaults
@@ -126,6 +139,7 @@ function mergeActivityResponses(responses: ActivityResponse[]): ActivityResponse
       debtUpdates: merged.debtUpdates.concat(response.debtUpdates),
       strategyChanges: merged.strategyChanges.concat(response.strategyChanges),
       shutdowns: merged.shutdowns.concat(response.shutdowns),
+      roleSets: merged.roleSets.concat(response.roleSets),
     }),
     {
       deposits: [],
@@ -135,6 +149,7 @@ function mergeActivityResponses(responses: ActivityResponse[]): ActivityResponse
       debtUpdates: [],
       strategyChanges: [],
       shutdowns: [],
+      roleSets: [],
     }
   );
 }
@@ -251,6 +266,20 @@ async function _getRecentActivity(limit: number = 50, chainIds: ChainId[] = [1])
         blockTimestamp
         transactionHash
       }
+      roleSets: RoleSet(
+        where: { chainId: { _in: $chainIds } }
+        order_by: { blockTimestamp: desc, blockNumber: desc, logIndex: desc }
+        limit: $limit
+      ) {
+        id
+        vaultAddress
+        chainId
+        blockNumber
+        blockTimestamp
+        transactionHash
+        account
+        role
+      }
     }
   `;
 
@@ -349,6 +378,7 @@ async function _getRecentUserTransactions(
     debtUpdates: [],
     strategyChanges: [],
     shutdowns: [],
+    roleSets: [],
   });
 
   if (chainIds.length <= 1) {
@@ -450,6 +480,20 @@ async function _getRecentVaultManagementActivity(
         blockTimestamp
         transactionHash
       }
+      roleSets: RoleSet(
+        where: { chainId: { _in: $chainIds } }
+        order_by: { blockTimestamp: desc, blockNumber: desc, logIndex: desc }
+        limit: $limit
+      ) {
+        id
+        vaultAddress
+        chainId
+        blockNumber
+        blockTimestamp
+        transactionHash
+        account
+        role
+      }
     }
   `;
 
@@ -461,6 +505,7 @@ async function _getRecentVaultManagementActivity(
     debtUpdates: response.debtUpdates,
     strategyChanges: response.strategyChanges,
     shutdowns: response.shutdowns,
+    roleSets: response.roleSets,
   });
 
   if (chainIds.length <= 1) {
@@ -478,12 +523,14 @@ async function _getRecentVaultManagementActivity(
       debtUpdates: acc.debtUpdates.concat(response.debtUpdates),
       strategyChanges: acc.strategyChanges.concat(response.strategyChanges),
       shutdowns: acc.shutdowns.concat(response.shutdowns),
+      roleSets: acc.roleSets.concat(response.roleSets),
     }),
     {
       strategyReports: [],
       debtUpdates: [],
       strategyChanges: [],
       shutdowns: [],
+      roleSets: [],
     }
   );
 

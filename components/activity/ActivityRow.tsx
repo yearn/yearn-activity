@@ -17,7 +17,7 @@ import VaultBadge from '@/components/shared/VaultBadge';
 interface ActivityRowProps {
   event: {
     id: string;
-    type: 'deposit' | 'withdraw' | 'transfer' | 'strategyReported' | 'debtUpdated' | 'strategyChanged' | 'shutdown';
+    type: 'deposit' | 'withdraw' | 'transfer' | 'strategyReported' | 'debtUpdated' | 'strategyChanged' | 'shutdown' | 'roleSet';
     chainId?: number;
     blockNumber?: string | number;
     blockTimestamp?: string | number;
@@ -39,6 +39,8 @@ interface ActivityRowProps {
     total_fees?: string;
     total_refunds?: string;
     change_type?: string;
+    account?: string;
+    role?: string;
   };
   strategyName?: string | null;
 }
@@ -152,6 +154,32 @@ export default function ActivityRow({ event, strategyName }: ActivityRowProps) {
           amount: 'Emergency',
           symbol: '',
         };
+      case 'roleSet':
+        const roleLabels: { [key: string]: string } = {
+          '1': 'ADD_STRATEGY_MANAGER',
+          '2': 'REVOKE_STRATEGY_MANAGER',
+          '4': 'FORCE_REVOKE_MANAGER',
+          '8': 'ACCOUNTANT_MANAGER',
+          '16': 'QUEUE_MANAGER',
+          '32': 'REPORTING_MANAGER',
+          '64': 'DEBT_MANAGER',
+          '128': 'MAX_DEBT_MANAGER',
+          '256': 'DEPOSIT_LIMIT_MANAGER',
+          '512': 'WITHDRAW_LIMIT_MANAGER',
+          '1024': 'MINIMUM_IDLE_MANAGER',
+          '2048': 'PROFIT_UNLOCK_MANAGER',
+          '4096': 'DEBT_PURCHASER',
+          '8192': 'EMERGENCY_MANAGER',
+        };
+        const roleLabel = event.role ? roleLabels[event.role] || `Role ${event.role}` : 'Role';
+        return {
+          icon: '👤',
+          iconBg: 'bg-blue-500/10',
+          iconColor: 'text-blue-500',
+          label: 'Role Change',
+          amount: event.account ? `${event.account.slice(0, 6)}...${event.account.slice(-4)}` : '',
+          symbol: roleLabel,
+        };
       default:
         return {
           icon: '❓',
@@ -162,7 +190,7 @@ export default function ActivityRow({ event, strategyName }: ActivityRowProps) {
           symbol: '',
         };
     }
-  }, [event.type, event.assets, event.value, event.gain, event.loss, event.debt_delta, event.change_type, event.strategy, decimals, vaultSymbol]);
+  }, [event.type, event.assets, event.value, event.gain, event.loss, event.debt_delta, event.change_type, event.strategy, event.account, event.role, decimals, vaultSymbol]);
 
   const debtDeltaValue = event.debt_delta ? BigInt(event.debt_delta) : null;
   const debtAmountClass =
