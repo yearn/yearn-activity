@@ -15,7 +15,7 @@ import {
 } from '@/lib/envio/constants';
 import { formatNumberWithCommas, parseEventId, sortEventsChronologically } from '@/lib/envio/utils';
 
-type EventType = 'deposit' | 'withdraw' | 'transfer' | 'strategyReported' | 'debtUpdated' | 'strategyChanged' | 'shutdown';
+type EventType = 'deposit' | 'withdraw' | 'transfer' | 'strategyReported' | 'debtUpdated' | 'strategyChanged' | 'shutdown' | 'roleSet';
 
 interface Event {
   id: string;
@@ -41,6 +41,8 @@ interface Event {
   total_fees?: string;
   total_refunds?: string;
   change_type?: string;
+  account?: string;
+  role?: string;
 }
 
 interface ActivityFeedProps {
@@ -60,7 +62,8 @@ const isVaultManagementEvent = (event: Event) =>
   event.type === 'strategyReported' ||
   event.type === 'debtUpdated' ||
   event.type === 'strategyChanged' ||
-  event.type === 'shutdown';
+  event.type === 'shutdown' ||
+  event.type === 'roleSet';
 
 export default function ActivityFeed({
   events,
@@ -243,6 +246,13 @@ export default function ActivityFeed({
           iconColor: 'text-orange-500',
         },
         {
+          value: 'roleSet',
+          label: 'Role Changes',
+          icon: '👤',
+          iconBg: 'bg-blue-500/10',
+          iconColor: 'text-blue-500',
+        },
+        {
           value: 'shutdown',
           label: 'Shutdowns',
           icon: '🛑',
@@ -356,7 +366,8 @@ export default function ActivityFeed({
           event.type === 'strategyReported' ||
           event.type === 'debtUpdated' ||
           event.type === 'strategyChanged' ||
-          event.type === 'shutdown';
+          event.type === 'shutdown' ||
+          event.type === 'roleSet';
 
         if (!isVaultEvent) return false;
 
@@ -658,7 +669,7 @@ export default function ActivityFeed({
       ) : null}
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
         {viewMode === 'vault' ? (
           <>
             <div className={vaultStatsCardClass}>
@@ -683,6 +694,12 @@ export default function ActivityFeed({
               <div className="text-sm text-good-ol-grey-400 mb-2">Strategy Changes</div>
               <div className="text-2xl font-bold text-orange-500 font-numeric">
                 {formatNumberWithCommas(limitedVaultEvents.filter((e) => e.type === 'strategyChanged').length)}
+              </div>
+            </div>
+            <div className={vaultStatsCardClass}>
+              <div className="text-sm text-good-ol-grey-400 mb-2">Role Changes</div>
+              <div className="text-2xl font-bold text-blue-500 font-numeric">
+                {formatNumberWithCommas(limitedVaultEvents.filter((e) => e.type === 'roleSet').length)}
               </div>
             </div>
           </>
@@ -817,6 +834,17 @@ export default function ActivityFeed({
                       <div className="text-sm font-semibold text-white">Strategy Changed</div>
                       <div className="text-xs text-good-ol-grey-400">
                         Strategy is added to or removed from the vault’s allocation set
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-500/10">
+                      <span className="text-blue-500 text-sm">👤</span>
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-white">Role Change</div>
+                      <div className="text-xs text-good-ol-grey-400">
+                        Account permissions modified (strategy manager, accountant, etc.)
                       </div>
                     </div>
                   </div>

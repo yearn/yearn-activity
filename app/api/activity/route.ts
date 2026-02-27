@@ -54,6 +54,7 @@ export async function GET(request: NextRequest) {
       })),
       ...activityData.strategyChanges.map((s) => ({ ...s, type: 'strategyChanged' as const })),
       ...activityData.shutdowns.map((s) => ({ ...s, type: 'shutdown' as const })),
+      ...activityData.roleSets.map((r) => ({ ...r, type: 'roleSet' as const })),
     ];
 
     const sortedEvents = sortEventsChronologically(allEvents).reverse();
