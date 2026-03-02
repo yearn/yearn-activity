@@ -56,10 +56,14 @@ export const TRACKED_VAULTS = {
   YS_USDC_POLYGON_2: '0x5BFd56F9BcBDb2be985C64C620ECa7F02Fa7b439',
   YS_DAI_POLYGON: '0xf4F9d5697341B4C9B0Cc8151413e05A90f7dc24F',
   YS_USDT0_POLYGON: '0xE30461F1270BA52d45DF1e773AEfE594C7E430DC',
+  KATANA_USDC: '0x80c34BD3A3569E126e7055831036aa7b212cB159',
+  KATANA_WETH: '0xE007CA01894c863d7898045ed5A3B4Abf0b18f37',
+  KATANA_USDT: '0x9A6bd7B6Fd5C4F87eb66356441502fc7dCdd185B',
+  KATANA_WBTC: '0xAa0362eCC584B985056E47812931270b99C91f9d',
 } as const;
 
 // Keep UI queries in sync with config.yaml.
-export const SUPPORTED_CHAIN_IDS = [1, 8453, 42161, 137] as const;
+export const SUPPORTED_CHAIN_IDS = [1, 8453, 42161, 137, 747474] as const;
 
 export const VAULT_NAMES: Record<string, string> = {
   [TRACKED_VAULTS.USDC_1.toLowerCase()]: 'USDC-1 Vault (Ethereum)',
@@ -119,6 +123,10 @@ export const VAULT_NAMES: Record<string, string> = {
   [TRACKED_VAULTS.YS_USDC_POLYGON_2.toLowerCase()]: 'ysUSDC-2 Vault (Polygon)',
   [TRACKED_VAULTS.YS_DAI_POLYGON.toLowerCase()]: 'ysDAI Vault (Polygon)',
   [TRACKED_VAULTS.YS_USDT0_POLYGON.toLowerCase()]: 'ysUSDT0 Vault (Polygon)',
+  [TRACKED_VAULTS.KATANA_USDC.toLowerCase()]: 'USDC Vault (Katana)',
+  [TRACKED_VAULTS.KATANA_WETH.toLowerCase()]: 'WETH Vault (Katana)',
+  [TRACKED_VAULTS.KATANA_USDT.toLowerCase()]: 'USDT Vault (Katana)',
+  [TRACKED_VAULTS.KATANA_WBTC.toLowerCase()]: 'WBTC Vault (Katana)',
 };
 
 export const VAULT_SYMBOLS: Record<string, string> = {
@@ -179,6 +187,10 @@ export const VAULT_SYMBOLS: Record<string, string> = {
   [TRACKED_VAULTS.YS_USDC_POLYGON_2.toLowerCase()]: 'USDC',
   [TRACKED_VAULTS.YS_DAI_POLYGON.toLowerCase()]: 'DAI',
   [TRACKED_VAULTS.YS_USDT0_POLYGON.toLowerCase()]: 'USDT0',
+  [TRACKED_VAULTS.KATANA_USDC.toLowerCase()]: 'USDC',
+  [TRACKED_VAULTS.KATANA_WETH.toLowerCase()]: 'WETH',
+  [TRACKED_VAULTS.KATANA_USDT.toLowerCase()]: 'USDT',
+  [TRACKED_VAULTS.KATANA_WBTC.toLowerCase()]: 'WBTC',
 };
 
 export const VAULT_DECIMALS: Record<string, number> = {
@@ -235,6 +247,10 @@ export const VAULT_DECIMALS: Record<string, number> = {
   [TRACKED_VAULTS.YS_USDC_POLYGON_2.toLowerCase()]: 6,
   [TRACKED_VAULTS.YS_DAI_POLYGON.toLowerCase()]: 18,
   [TRACKED_VAULTS.YS_USDT0_POLYGON.toLowerCase()]: 6,
+  [TRACKED_VAULTS.KATANA_USDC.toLowerCase()]: 6,
+  [TRACKED_VAULTS.KATANA_WETH.toLowerCase()]: 18,
+  [TRACKED_VAULTS.KATANA_USDT.toLowerCase()]: 6,
+  [TRACKED_VAULTS.KATANA_WBTC.toLowerCase()]: 8,
 };
 
 export const VAULT_CHAIN_IDS: Record<string, (typeof SUPPORTED_CHAIN_IDS)[number]> = {
@@ -295,6 +311,10 @@ export const VAULT_CHAIN_IDS: Record<string, (typeof SUPPORTED_CHAIN_IDS)[number
   [TRACKED_VAULTS.YS_USDC_POLYGON_2.toLowerCase()]: 137,
   [TRACKED_VAULTS.YS_DAI_POLYGON.toLowerCase()]: 137,
   [TRACKED_VAULTS.YS_USDT0_POLYGON.toLowerCase()]: 137,
+  [TRACKED_VAULTS.KATANA_USDC.toLowerCase()]: 747474,
+  [TRACKED_VAULTS.KATANA_WETH.toLowerCase()]: 747474,
+  [TRACKED_VAULTS.KATANA_USDT.toLowerCase()]: 747474,
+  [TRACKED_VAULTS.KATANA_WBTC.toLowerCase()]: 747474,
 };
 
 export const CHAIN_NAMES: Record<number, string> = {
