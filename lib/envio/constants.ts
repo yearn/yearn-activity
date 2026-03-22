@@ -60,6 +60,7 @@ export const TRACKED_VAULTS = {
   KATANA_WETH: '0xE007CA01894c863d7898045ed5A3B4Abf0b18f37',
   KATANA_USDT: '0x9A6bd7B6Fd5C4F87eb66356441502fc7dCdd185B',
   KATANA_WBTC: '0xAa0362eCC584B985056E47812931270b99C91f9d',
+  YVUSD: '0x696d02Db93291651ED510704c9b286841d506987',
 } as const;
 
 // Keep UI queries in sync with config.yaml.
@@ -127,6 +128,7 @@ export const VAULT_NAMES: Record<string, string> = {
   [TRACKED_VAULTS.KATANA_WETH.toLowerCase()]: 'WETH Vault (Katana)',
   [TRACKED_VAULTS.KATANA_USDT.toLowerCase()]: 'USDT Vault (Katana)',
   [TRACKED_VAULTS.KATANA_WBTC.toLowerCase()]: 'WBTC Vault (Katana)',
+  [TRACKED_VAULTS.YVUSD.toLowerCase()]: 'yvUSD Vault (Ethereum)',
 };
 
 export const VAULT_SYMBOLS: Record<string, string> = {
@@ -191,6 +193,7 @@ export const VAULT_SYMBOLS: Record<string, string> = {
   [TRACKED_VAULTS.KATANA_WETH.toLowerCase()]: 'WETH',
   [TRACKED_VAULTS.KATANA_USDT.toLowerCase()]: 'USDT',
   [TRACKED_VAULTS.KATANA_WBTC.toLowerCase()]: 'WBTC',
+  [TRACKED_VAULTS.YVUSD.toLowerCase()]: 'yvUSD',
 };
 
 export const VAULT_DECIMALS: Record<string, number> = {
@@ -251,6 +254,7 @@ export const VAULT_DECIMALS: Record<string, number> = {
   [TRACKED_VAULTS.KATANA_WETH.toLowerCase()]: 18,
   [TRACKED_VAULTS.KATANA_USDT.toLowerCase()]: 6,
   [TRACKED_VAULTS.KATANA_WBTC.toLowerCase()]: 8,
+  [TRACKED_VAULTS.YVUSD.toLowerCase()]: 6,
 };
 
 export const VAULT_CHAIN_IDS: Record<string, (typeof SUPPORTED_CHAIN_IDS)[number]> = {
@@ -315,6 +319,7 @@ export const VAULT_CHAIN_IDS: Record<string, (typeof SUPPORTED_CHAIN_IDS)[number
   [TRACKED_VAULTS.KATANA_WETH.toLowerCase()]: 747474,
   [TRACKED_VAULTS.KATANA_USDT.toLowerCase()]: 747474,
   [TRACKED_VAULTS.KATANA_WBTC.toLowerCase()]: 747474,
+  [TRACKED_VAULTS.YVUSD.toLowerCase()]: 1,
 };
 
 export const CHAIN_NAMES: Record<number, string> = {
@@ -558,6 +563,10 @@ export const VAULT_ASSET_TOKENS: Record<string, { chainId: number; tokenAddress:
   [TRACKED_VAULTS.YS_USDT0_POLYGON.toLowerCase()]: {
     chainId: 137,
     tokenAddress: '0xc2132d05d31c914a87c6611c10748aeb04b58e8f',
+  },
+  [TRACKED_VAULTS.YVUSD.toLowerCase()]: {
+    chainId: 1,
+    tokenAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
   },
 };
 
