@@ -3,19 +3,12 @@ import { GraphQLClient } from 'graphql-request';
 const ENVIO_GRAPHQL_URL = process.env.ENVIO_GRAPHQL_URL || 'http://localhost:8080/v1/graphql';
 const ENVIO_TOKEN = process.env.ENVIO_PASSWORD || '';
 
-const noStoreFetch: typeof fetch = (input, init) =>
-  fetch(input, {
-    ...init,
-    cache: 'no-store',
-  });
-
 const headers: Record<string, string> = {};
 if (ENVIO_TOKEN) {
   headers['Authorization'] = `Bearer ${ENVIO_TOKEN}`;
 }
 
 export const envioClient = new GraphQLClient(ENVIO_GRAPHQL_URL, {
-  fetch: noStoreFetch,
   headers,
 });
 
