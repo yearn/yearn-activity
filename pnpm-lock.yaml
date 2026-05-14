@@ -9,10 +9,10 @@ importers:
   .:
     dependencies:
       graphql:
-        specifier: ^16.13.0
+        specifier: 16.13.0
         version: 16.13.0
       graphql-request:
-        specifier: ^7.4.0
+        specifier: 7.4.0
         version: 7.4.0(graphql@16.13.0)
       next:
         specifier: 16.2.6
@@ -24,35 +24,35 @@ importers:
         specifier: 19.0.0
         version: 19.0.0(react@19.0.0)
       viem:
-        specifier: ^2.46.3
+        specifier: 2.46.3
         version: 2.46.3(typescript@5.9.3)(zod@4.3.6)
     devDependencies:
       '@types/node':
-        specifier: ^22.19.11
+        specifier: 22.19.11
         version: 22.19.11
       '@types/react':
-        specifier: ^19.2.14
+        specifier: 19.2.14
         version: 19.2.14
       '@types/react-dom':
-        specifier: ^19.2.3
+        specifier: 19.2.3
         version: 19.2.3(@types/react@19.2.14)
       autoprefixer:
-        specifier: ^10.4.24
+        specifier: 10.4.24
         version: 10.4.24(postcss@8.5.6)
       eslint:
-        specifier: ^9.39.3
+        specifier: 9.39.3
         version: 9.39.3(jiti@1.21.7)
       eslint-config-next:
         specifier: 16.1.6
         version: 16.1.6(@typescript-eslint/parser@8.56.1(eslint@9.39.3(jiti@1.21.7))(typescript@5.9.3))(eslint@9.39.3(jiti@1.21.7))(typescript@5.9.3)
       postcss:
-        specifier: ^8.5.6
+        specifier: 8.5.6
         version: 8.5.6
       tailwindcss:
-        specifier: ^3.4.19
+        specifier: 3.4.19
         version: 3.4.19
       typescript:
-        specifier: ^5.9.3
+        specifier: 5.9.3
         version: 5.9.3
 
 packages:
