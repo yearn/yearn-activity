@@ -333,7 +333,7 @@ export const CHAIN_NAMES: Record<number, string> = {
 export const getChainName = (chainId: number) => CHAIN_NAMES[chainId] ?? `Chain ${chainId}`;
 
 export const getChainLogoUrl = (chainId: number) =>
-  `https://token-assets-one.vercel.app/api/chains/${chainId}/logo-32.png?fallback=true`;
+  `https://assets.yearn.fi/api/chains/${chainId}/logo-32.png?fallback=true`;
 
 export const VAULT_ASSET_TOKENS: Record<string, { chainId: number; tokenAddress: string }> = {
   [TRACKED_VAULTS.USDC_1.toLowerCase()]: {
@@ -571,4 +571,4 @@ export const VAULT_ASSET_TOKENS: Record<string, { chainId: number; tokenAddress:
 };
 
 export const getTokenLogoUrl = (chainId: number, tokenAddress: string) =>
-  `https://token-assets-one.vercel.app/api/tokens/${chainId}/${tokenAddress.toLowerCase()}/logo-32.png?fallback=true`;
+  `https://assets.yearn.fi/api/tokens/${chainId}/${tokenAddress.toLowerCase()}/logo-32.png?fallback=true`;

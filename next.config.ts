@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'token-assets-one.vercel.app',
+        hostname: 'assets.yearn.fi',
       },
     ],
   },
