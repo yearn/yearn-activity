@@ -19,7 +19,7 @@ Real-time activity dashboard for Yearn Finance V3 vaults
 
 ## Prerequisites
 
-1. **Node.js 18+** and **pnpm** installed
+1. **Node.js 18+** and **bun** installed
 2. **Envio Indexer** running locally or hosted
 
 ## Getting Started
@@ -27,7 +27,7 @@ Real-time activity dashboard for Yearn Finance V3 vaults
 ### 1. Install Dependencies
 
 ```bash
-pnpm install
+bun install
 ```
 
 ### 2. Set Up Environment Variables
@@ -65,7 +65,7 @@ Wait for the indexer to sync some data before proceeding.
 ### 4. Run the Development Server
 
 ```bash
-pnpm dev
+bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
@@ -181,13 +181,10 @@ export async function GET() {
 
 ## Deployment
 
-### Deploy to Vercel
+### Deploy to Cloudflare Workers
 
-1. Push your code to GitHub
-2. Import the project in Vercel
-3. Add environment variables:
-   - `ENVIO_GRAPHQL_URL`: Your hosted Envio endpoint
-4. Deploy
+Pushes to `master` deploy through `.github/workflows/cloudflare-deploy.yml`, and each PR gets a preview Worker.
+Environment variables (`ENVIO_GRAPHQL_URL`, `ENVIO_PASSWORD`) come from the Doppler project `yearn-activity`.
 
 ### Deploy Envio Indexer
 
